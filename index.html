@@ -3,189 +3,216 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Vania Runner: Yusuf vs Ambon</title>
+    <title>Yusuf: The Vengeance of Ambon</title>
     <style>
-        body { margin: 0; overflow: hidden; background: #1a1a1a; font-family: 'Segoe UI', Arial, sans-serif; touch-action: manipulation; }
+        body { margin: 0; overflow: hidden; background: #1a1a1a; font-family: 'Segoe UI', Arial, sans-serif; touch-action: none; }
         
         #game { 
-            position: relative; width: 100vw; height: 400px; 
-            max-width: 800px; margin: 0 auto; background: linear-gradient(#4facfe, #00f2fe); 
-            overflow: hidden; border-bottom: 5px solid #fff;
+            position: relative; width: 100vw; height: 350px; 
+            max-width: 800px; margin: 0 auto; overflow: hidden; border-bottom: 5px solid #fff;
+            transition: background 1.5s ease;
         }
 
-        #ground { 
-            position: absolute; bottom: 0; width: 200%; height: 60px; 
-            background: #795548; border-top: 5px solid #5d4037;
-            background-image: linear-gradient(90deg, transparent 90%, rgba(0,0,0,0.1) 90%);
-            background-size: 50px 100%;
+        .char-name { position: absolute; top: -25px; width: 100%; text-align: center; font-size: 12px; color: white; font-weight: bold; text-shadow: 1px 1px black; }
+
+        /* YUSUF SI BUAYA */
+        #player { position: absolute; left: 80px; bottom: 60px; width: 60px; height: 25px; background: #1b5e20; border-radius: 5px 20px 5px 5px; z-index: 10; }
+        #player::after { content: ""; position: absolute; right: -25px; bottom: 0; width: 30px; height: 12px; background: #1b5e20; border-radius: 0 10px 5px 0; border-bottom: 2px solid #000; }
+        .scutes { position: absolute; top: -8px; left: 5px; width: 40px; height: 10px; background: repeating-linear-gradient(90deg, #0d2e0f 0px, #0d2e0f 5px, transparent 5px, transparent 10px); }
+        #tongue { position: absolute; right: -35px; bottom: 4px; width: 20px; height: 4px; background: #ff4081; border-radius: 2px; animation: flick 0.3s infinite; transform-origin: left; z-index: 11; }
+        @keyframes flick { 0%, 100% { transform: scaleX(0); } 50% { transform: scaleX(1.2); } }
+
+        /* AMBON SI SERAM */
+        #ambon { position: absolute; left: 15px; bottom: 60px; width: 45px; height: 55px; background: #4a0000; border-radius: 8px; z-index: 10; border: 2px solid #2a0000; transition: 0.2s; }
+        .scary-eye { position: absolute; top: 10px; right: 8px; width: 10px; height: 10px; background: #ff0000; border-radius: 50%; box-shadow: 0 0 10px #ff0000; animation: blinkRed 1s infinite; }
+        #ambonHand { position: absolute; right: -15px; top: 15px; width: 15px; height: 8px; background: #4a0000; animation: swing 0.3s infinite alternate; transform-origin: left center; }
+        .axe-handle { position: absolute; right: -5px; top: -20px; width: 5px; height: 40px; background: #3e2723; transform: rotate(15deg); }
+        .axe-head { position: absolute; top: -8px; left: -15px; width: 22px; height: 18px; background: #757575; border-radius: 5px 0 0 5px; border-left: 5px solid #eee; }
+
+        /* ANIMASI KAPAK DILEMPAR */
+        .axe-thrown { animation: throwAxe 0.5s forwards linear !important; }
+        @keyframes throwAxe { 
+            0% { transform: translate(0, 0) rotate(0deg); }
+            100% { transform: translate(100px, 10px) rotate(720deg); }
         }
 
-        /* --- YUSUF SI BUAYA --- */
-        #player { 
-            position: absolute; left: 80px; bottom: 60px; 
-            width: 50px; height: 28px; background: #2e7d32; 
-            border-radius: 5px 15px 5px 5px; z-index: 10; 
-        }
-        #player::before { 
-            content: ""; position: absolute; right: -15px; bottom: 0; 
-            width: 20px; height: 15px; background: #2e7d32; border-radius: 0 10px 5px 0; 
-        }
-        .eye { position: absolute; top: 4px; right: 4px; width: 8px; height: 8px; background: white; border-radius: 50%; }
-        .eye::after { content: ""; position: absolute; right: 1px; top: 2px; width: 3px; height: 3px; background: black; border-radius: 50%; }
-        .leg { position: absolute; bottom: -8px; width: 10px; height: 10px; background: #1b5e20; border-radius: 2px; }
-        .leg-f { left: 8px; animation: pWalk 0.2s infinite alternate; }
-        .leg-b { right: 12px; animation: pWalk 0.2s infinite alternate-reverse; }
+        /* MATA, KAKI & UI */
+        .p-eye { position: absolute; top: 3px; right: 10px; width: 7px; height: 7px; background: white; border-radius: 50%; z-index: 12; }
+        .leg { position: absolute; bottom: -8px; width: 10px; height: 10px; background: #0d2e0f; border-radius: 2px; }
+        .leg-f { left: 10px; animation: pWalk 0.2s infinite alternate; }
+        .leg-b { right: 20px; animation: pWalk 0.2s infinite alternate-reverse; }
         @keyframes pWalk { from { transform: translateY(0); } to { transform: translateY(-6px); } }
-
-        /* --- AMBON --- */
-        #ambon { 
-            position: absolute; left: 15px; bottom: 60px; 
-            width: 35px; height: 40px; background: #8b0000; border-radius: 5px; z-index: 4; 
-        }
-        .hand { 
-            position: absolute; right: -8px; top: 12px; width: 10px; height: 6px; 
-            background: #8b0000; animation: swing 0.4s infinite alternate; transform-origin: left center; 
-        }
-        .axe-handle { position: absolute; right: -5px; top: -12px; width: 3px; height: 25px; background: #5d4037; transform: rotate(20deg); }
-        .axe-head { position: absolute; top: -5px; left: -10px; width: 15px; height: 12px; background: #9e9e9e; border-radius: 8px 0 0 8px; }
-        @keyframes swing { from { transform: rotate(-30deg); } to { transform: rotate(50deg); } }
-
-        /* --- OBJEK & UI --- */
-        .name { position: absolute; top: -22px; width: 100%; text-align: center; font-size: 10px; color: white; font-weight: bold; text-shadow: 1px 1px black; }
-        #ui { position: absolute; top: 10px; left: 15px; right: 15px; color: white; font-size: 14px; font-weight: bold; display: flex; justify-content: space-between; z-index: 100; text-shadow: 1px 1px #000; }
-        .cactus { position: absolute; bottom: 60px; width: 25px; height: 40px; background: #004d40; border-radius: 4px; border-left: 5px solid #00695c; }
-        .axe-air { position: absolute; width: 30px; height: 20px; background: #ff5722; color: white; display: flex; justify-content: center; align-items: center; border-radius: 4px; font-size: 12px; font-weight: bold; }
-        .love { position: absolute; background: #ff4081; color: white; padding: 5px 10px; border-radius: 15px; font-size: 10px; font-weight: bold; box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
         
-        #overlay { position: absolute; inset: 0; display: none; flex-direction: column; justify-content: center; align-items: center; background: rgba(0,0,0,0.85); color: white; z-index: 200; text-align: center; padding: 20px; }
-        button { cursor: pointer; margin-top: 15px; padding: 12px 30px; font-size: 16px; border: none; border-radius: 50px; background: #ff4081; color: white; font-weight: bold; box-shadow: 0 5px 15px rgba(255, 64, 129, 0.4); }
+        #ui { position: absolute; top: 10px; left: 15px; right: 15px; color: white; font-weight: bold; display: flex; justify-content: space-between; z-index: 100; text-shadow: 1px 1px #000; }
+        #ground { position: absolute; bottom: 0; width: 200%; height: 60px; border-top: 4px solid #fff; transition: 1s; }
+        
+        .obstacle { position: absolute; bottom: 60px; width: 35px; height: 40px; display: flex; justify-content: center; align-items: center; font-size: 28px; z-index: 5; }
+        .love { position: absolute; background: #ff4081; color: white; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: bold; z-index: 8; box-shadow: 0 0 10px #ff4081; animation: float 1s infinite alternate; white-space: nowrap; }
+        @keyframes float { from { transform: translateY(0); } to { transform: translateY(-10px); } }
+        @keyframes swing { from { transform: rotate(-30deg); } to { transform: rotate(50deg); } }
+        
+        #overlay { position: absolute; inset: 0; display: none; flex-direction: column; justify-content: center; align-items: center; background: rgba(0,0,0,0.95); color: white; z-index: 999; text-align: center; padding: 20px; }
+        .btn { cursor: pointer; margin-top: 20px; padding: 12px 35px; background: #ff4081; color: white; border-radius: 50px; font-weight: bold; border: none; font-size: 18px; }
+
+        /* BIOMES */
+        .b0 { background: #4facfe; } .g0 { background: #2e7d32; }
+        .b1 { background: #f0b06b; } .g1 { background: #d2b48c; }
+        .b2 { background: #0077cc; } .g2 { background: #01579b; }
+        .b3 { background: #212121; } .g3 { background: #b71c1c; }
+        .b4 { background: #000022; } .g4 { background: #000; }
+
+        .bg-deco { position: absolute; opacity: 0.4; font-size: 30px; z-index: 1; animation: moveDeco 12s linear infinite; }
+        @keyframes moveDeco { from { left: 110%; } to { left: -60px; } }
+        
+        #warning { color: #ff4081; font-size: 14px; margin-top: 5px; }
     </style>
 </head>
 <body>
 
-<div id="game">
+<div id="game" class="b0">
     <div id="ui">
-        <div>❤️ Love: <span id="scoreVal">0</span>/50</div>
+        <div>❤️ Cinta: <span id="scoreVal">0</span>/50 <div id="warning">Terlewati: <span id="missedVal">0</span>/5</div></div>
+        <div id="biomeName">Hutan Terlarang</div>
         <div>⏱️ <span id="timerVal">0.0</span>s</div>
-        <div id="bestRecord" style="color: #ffeb3b;">🏆 Best: --</div>
     </div>
-    
-    <div id="ground"></div>
-    <div id="ambon"><div class="name">Ambon</div><div class="hand"><div class="axe-handle"><div class="axe-head"></div></div></div></div>
-    <div id="player"><div class="name">Yusuf</div><div class="eye"></div><div class="leg leg-f"></div><div class="leg leg-b"></div></div>
-    
+    <div id="decoContainer"></div>
+    <div id="ground" class="g0"></div>
+    <div id="ambon">
+        <div class="char-name">Ambon</div>
+        <div class="scary-eye"></div>
+        <div id="ambonHand">
+            <div class="axe-handle"><div class="axe-head"></div></div>
+        </div>
+    </div>
+    <div id="player">
+        <div class="char-name">Yusuf</div>
+        <div class="scutes"></div>
+        <div id="tongue"></div>
+        <div class="p-eye"></div>
+        <div class="leg leg-f"></div>
+        <div class="leg leg-b"></div>
+    </div>
     <div id="overlay"></div>
 </div>
 
 <script>
-    const player = document.getElementById("player"), scoreVal = document.getElementById("scoreVal");
-    const timerVal = document.getElementById("timerVal"), bestEl = document.getElementById("bestRecord");
-    const overlay = document.getElementById("overlay"), gameArea = document.getElementById("game");
+    const player = document.getElementById("player"), ground = document.getElementById("ground");
+    const game = document.getElementById("game"), decoContainer = document.getElementById("decoContainer");
+    const scoreVal = document.getElementById("scoreVal"), missedVal = document.getElementById("missedVal");
+    const timerVal = document.getElementById("timerVal"), overlay = document.getElementById("overlay");
+    const ambonHand = document.getElementById("ambonHand");
 
-    let y = 0, vy = 0, jumpCount = 0, speed = 6, loveCount = 0, gameOver = false;
-    let obstacles = [], spawnTimer = 0, groundPos = 0, startTime = Date.now();
-    
-    const GRAVITY = 0.7, JUMP_FORCE = 13, GROUND_Y = 60;
+    let y = 0, vy = 0, jumpCount = 0, speed = 6, loveCount = 0, missedLove = 0, gameOver = false, startTime = Date.now();
+    let obstacles = [], groundPos = 0, currentBiome = 0;
+    let loveSpawnTimer = 0, obstacleSpawnTimer = 0;
 
-    // Load Rekor Terbaik
-    let savedBest = localStorage.getItem("bestTimeVania");
-    if(savedBest) bestEl.innerText = `🏆 Best: ${savedBest}s`;
+    const BIOME_DATA = [
+        { n: "Hutan Terlarang", bg: "b0", gr: "g0", deco: "🌳", obs: "🍄", air: "🐦" },
+        { n: "Gurun Pasir", bg: "b1", gr: "g1", deco: "🏜️", obs: "🌵", air: "🦅" },
+        { n: "Lautan Dalam", bg: "b2", gr: "g2", deco: "🌊", obs: "🐡", air: "🐟" },
+        { n: "Kawah Neraka", bg: "b3", gr: "g3", deco: "🌋", obs: "🔥", air: "☄️" },
+        { n: "Luar Angkasa", bg: "b4", gr: "g4", deco: "🌟", obs: "🌑", air: "🪐" }
+    ];
 
-    function jump() {
-        if (jumpCount < 2 && !gameOver) {
-            vy = JUMP_FORCE;
-            jumpCount++;
-        }
-    }
+    function jump() { if (jumpCount < 2 && !gameOver) { vy = 13; jumpCount++; } }
+    window.addEventListener("pointerdown", () => jump());
+    window.addEventListener("keydown", (e) => { if(e.code === "Space") jump(); });
 
-    // Input (Keyboard & Sentuhan HP)
-    window.addEventListener("keydown", e => { if(e.code === "Space" || e.code === "ArrowUp") jump(); });
-    gameArea.addEventListener("touchstart", e => { e.preventDefault(); jump(); }, {passive: false});
-
-    function spawn() {
-        const rand = Math.random();
+    function createObj(type) {
         const el = document.createElement("div");
-        let type = 'enemy';
-
-        if (rand > 0.75) {
+        if (type === 'love') {
             el.className = "love"; el.innerText = "❤️ VANIA";
-            el.style.bottom = (GROUND_Y + 60 + Math.random()*60) + "px";
-            type = 'love';
-        } else if (rand > 0.4) {
-            el.className = "cactus"; el.style.bottom = GROUND_Y + "px";
-            // Random Kaktus Berdekatan
-            if(Math.random() > 0.6) {
-                setTimeout(() => { if(!gameOver) spawnExtra(); }, 180);
-            }
+            const h = [100, 170, 230]; 
+            el.style.bottom = h[Math.floor(Math.random() * h.length)] + "px";
         } else {
-            el.className = "axe-air"; el.innerText = "🪓";
-            el.style.bottom = (GROUND_Y + 85) + "px";
+            el.className = "obstacle";
+            const isAir = Math.random() > 0.5;
+            el.innerText = isAir ? BIOME_DATA[currentBiome].air : BIOME_DATA[currentBiome].obs;
+            el.style.bottom = isAir ? "175px" : "60px";
         }
-
         el.style.left = "850px";
-        gameArea.appendChild(el);
+        game.appendChild(el);
         obstacles.push({ el, type });
     }
 
-    function spawnExtra() {
-        const el = document.createElement("div");
-        el.className = "cactus"; el.style.bottom = GROUND_Y + "px"; el.style.left = "850px";
-        gameArea.appendChild(el);
-        obstacles.push({ el, type: 'enemy' });
+    function spawnDeco() {
+        const d = document.createElement("div");
+        d.className = "bg-deco";
+        d.innerText = BIOME_DATA[currentBiome].deco;
+        d.style.top = (Math.random() * 100 + 30) + "px";
+        decoContainer.appendChild(d);
+        setTimeout(() => d.remove(), 12000);
     }
 
     function update() {
         if (gameOver) return;
+        timerVal.innerText = ((Date.now() - startTime) / 1000).toFixed(1);
 
-        let currentTime = ((Date.now() - startTime) / 1000).toFixed(1);
-        timerVal.innerText = currentTime;
-
-        vy -= GRAVITY; y += vy;
+        vy -= 0.7; y += vy;
         if (y <= 0) { y = 0; vy = 0; jumpCount = 0; }
-        player.style.bottom = (GROUND_Y + y) + "px";
+        player.style.bottom = (60 + y) + "px";
 
         groundPos -= speed; if (groundPos <= -50) groundPos = 0;
-        document.getElementById("ground").style.transform = `translateX(${groundPos}px)`;
+        ground.style.transform = `translateX(${groundPos}px)`;
 
-        if (--spawnTimer <= 0) {
-            spawn();
-            spawnTimer = Math.max(30, 75 - (loveCount * 0.8) + Math.random()*30);
-        }
+        if (++loveSpawnTimer >= 300) { createObj('love'); loveSpawnTimer = 0; }
+        if (++obstacleSpawnTimer >= Math.max(25, 60 - speed)) { createObj('enemy'); obstacleSpawnTimer = 0; }
 
         const pRect = player.getBoundingClientRect();
         for (let i = obstacles.length - 1; i >= 0; i--) {
             let o = obstacles[i], x = o.el.offsetLeft - speed;
             o.el.style.left = x + "px";
-
             const oRect = o.el.getBoundingClientRect();
-            // Collision Detection
-            if (!(pRect.right-10 < oRect.left+10 || pRect.left+10 > oRect.right-10 || pRect.bottom-10 < oRect.top+10 || pRect.top+10 > oRect.bottom-10)) {
-                if (o.type === 'enemy') { finish(false, currentTime); return; }
+
+            // Tabrakan
+            if (!(pRect.right-20 < oRect.left+10 || pRect.left+10 > oRect.right-20 || pRect.bottom-5 < oRect.top+5 || pRect.top+5 > oRect.bottom-5)) {
+                if (o.type === 'enemy') { finish("💔 TERHENTI RINTANGAN!"); return; }
                 else {
                     loveCount++; scoreVal.innerText = loveCount;
-                    o.el.remove(); obstacles.splice(i,1); speed += 0.15;
-                    if (loveCount >= 50) { finish(true, currentTime); return; }
+                    o.el.remove(); obstacles.splice(i, 1);
+                    speed += 0.15;
+                    if (loveCount % 10 === 0 && currentBiome < 4) {
+                        currentBiome++;
+                        game.className = BIOME_DATA[currentBiome].bg;
+                        ground.className = BIOME_DATA[currentBiome].gr;
+                        document.getElementById("biomeName").innerText = BIOME_DATA[currentBiome].n;
+                    }
+                    if (loveCount >= 50) { finish("💍 PERJALANAN SELESAI!"); return; }
                     continue;
                 }
             }
-            if (x < -100) { o.el.remove(); obstacles.splice(i,1); }
+            
+            // Mekanik Missed Love
+            if (x < -150) {
+                if (o.type === 'love') {
+                    missedLove++;
+                    missedVal.innerText = missedLove;
+                    if (missedLove >= 5) {
+                        executeAmbonPunishment();
+                        return;
+                    }
+                }
+                o.el.remove(); obstacles.splice(i, 1);
+            }
         }
         requestAnimationFrame(update);
     }
 
-    function finish(win, time) {
+    function executeAmbonPunishment() {
         gameOver = true;
-        overlay.style.display = "flex";
-        let title = win ? "💍 HAPPY WEDDING!" : "💔 DIHADANG AMBON";
-        let sub = win ? `Yusuf & Vania bersatu dalam ${time}s!` : `Gagal mengumpulkan cinta Vania.`;
-        
-        if (win && (!savedBest || parseFloat(time) < parseFloat(savedBest))) {
-            localStorage.setItem("bestTimeVania", time);
-            sub += "<br><b style='color:#ffeb3b'>🏆 REKOR BARU!</b>";
-        }
-        overlay.innerHTML = `<h1>${title}</h1><p>${sub}</p><button onclick="location.reload()">MAIN LAGI</button>`;
+        ambonHand.classList.add('axe-thrown'); // Animasi lempar kapak
+        setTimeout(() => {
+            finish("🪓 AMBON MARAH!<br>Kamu mengabaikan cinta Vania!");
+        }, 500);
     }
 
+    function finish(m) {
+        gameOver = true;
+        overlay.style.display = "flex";
+        overlay.innerHTML = `<h1 style="color:#ff4081">${m}</h1><p>Skor: ${loveCount} Love</p><button class="btn" onclick="location.reload()">ULANGI</button>`;
+    }
+
+    setInterval(() => { if(!gameOver) spawnDeco(); }, 4000);
     requestAnimationFrame(update);
 </script>
 </body>
