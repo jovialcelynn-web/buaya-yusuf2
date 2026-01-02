@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Vania Runner: Yusuf vs Ambon</title>
+    <style>
+        body { margin: 0; overflow: hidden; background: #1a1a1a; font-family: 'Segoe UI', Arial, sans-serif; touch-action: manipulation; }
+        
+        #game { 
+            position: relative; width: 100vw; height: 400px; 
+            max-width: 800px; margin: 0 auto; background: linear-gradient(#4facfe, #00f2fe); 
+            overflow: hidden; border-bottom: 5px solid #fff;
+        }
+
+        #ground { 
+            position: absolute; bottom: 0; width: 200%; height: 60px; 
+            background: #795548; border-top: 5px solid #5d4037;
+            background-image: linear-gradient(90deg, transparent 90%, rgba(0,0,0,0.1) 90%);
+            background-size: 50px 100%;
+        }
+
+        /* --- YUSUF SI BUAYA --- */
+        #player { 
+            position: absolute; left: 80px; bottom: 60px; 
+            width: 50px; height: 28px; background: #2e7d32; 
+            border-radius: 5px 15px 5px 5px; z-index: 10; 
+        }
+        #player::before { 
+            content: ""; position: absolute; right: -15px; bottom: 0; 
+            width: 20px; height: 15px; background: #2e7d32; border-radius: 0 10px 5px 0; 
+        }
+        .eye { position: absolute; top: 4px; right: 4px; width: 8px; height: 8px; background: white; border-radius: 50%; }
+        .eye::after { content: ""; position: absolute; right: 1px; top: 2px; width: 3px; height: 3px; background: black; border-radius: 50%; }
+        .leg { position: absolute; bottom: -8px; width: 10px; height: 10px; background: #1b5e20; border-radius: 2px; }
+        .leg-f { left: 8px; animation: pWalk 0.2s infinite alternate; }
+        .leg-b { right: 12px; animation: pWalk 0.2s infinite alternate-reverse; }
+        @keyframes pWalk { from { transform: translateY(0); } to { transform: translateY(-6px); } }
+
+        /* --- AMBON --- */
+        #ambon { 
+            position: absolute; left: 15px; bottom: 60px; 
+            width: 35px; height: 40px; background: #8b0000; border-radius: 5px; z-index: 4; 
+        }
+        .hand { 
+            position: absolute; right: -8px; top: 12px; width: 10px; height: 6px; 
+            background: #8b0000; animation: swing 0.4s infinite alternate; transform-origin: left center; 
+        }
+        .axe-handle { position: absolute; right: -5px; top: -12px; width: 3px; height: 25px; background: #5d4037; transform: rotate(20deg); }
+        .axe-head { position: absolute; top: -5px; left: -10px; width: 15px; height: 12px; background: #9e9e9e; border-radius: 8px 0 0 8px; }
+        @keyframes swing { from { transform: rotate(-30deg); } to { transform: rotate(50deg); } }
+
+        /* --- OBJEK & UI --- */
+        .name { position: absolute; top: -22px; width: 100%; text-align: center; font-size: 10px; color: white; font-weight: bold; text-shadow: 1px 1px black; }
+        #ui { position: absolute; top: 10px; left: 15px; right: 15px; color: white; font-size: 14px; font-weight: bold; display: flex; justify-content: space-between; z-index: 100; text-shadow: 1px 1px #000; }
+        .cactus { position: absolute; bottom: 60px; width: 25px; height: 40px; background: #004d40; border-radius: 4px; border-left: 5px solid #00695c; }
+        .axe-air { position: absolute; width: 30px; height: 20px; background: #ff5722; color: white; display: flex; justify-content: center; align-items: center; border-radius: 4px; font-size: 12px; font-weight: bold; }
+        .love { position: absolute; background: #ff4081; color: white; padding: 5px 10px; border-radius: 15px; font-size: 10px; font-weight: bold; box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+        
+        #overlay { position: absolute; inset: 0; display: none; flex-direction: column; justify-content: center; align-items: center; background: rgba(0,0,0,0.85); color: white; z-index: 200; text-align: center; padding: 20px; }
+        button { cursor: pointer; margin-top: 15px; padding: 12px 30px; font-size: 16px; border: none; border-radius: 50px; background: #ff4081; color: white; font-weight: bold; box-shadow: 0 5px 15px rgba(255, 64, 129, 0.4); }
+    </style>
+</head>
+<body>
+
+<div id="game">
+    <div id="ui">
+        <div>❤️ Love: <span id="scoreVal">0</span>/50</div>
+        <div>⏱️ <span id="timerVal">0.0</span>s</div>
+        <div id="bestRecord" style="color: #ffeb3b;">🏆 Best: --</div>
+    </div>
+    
+    <div id="ground"></div>
+    <div id="ambon"><div class="name">Ambon</div><div class="hand"><div class="axe-handle"><div class="axe-head"></div></div></div></div>
+    <div id="player"><div class="name">Yusuf</div><div class="eye"></div><div class="leg leg-f"></div><div class="leg leg-b"></div></div>
+    
+    <div id="overlay"></div>
+</div>
+
+<script>
+    const player = document.getElementById("player"), scoreVal = document.getElementById("scoreVal");
+    const timerVal = document.getElementById("timerVal"), bestEl = document.getElementById("bestRecord");
+    const overlay = document.getElementById("overlay"), gameArea = document.getElementById("game");
+
+    let y = 0, vy = 0, jumpCount = 0, speed = 6, loveCount = 0, gameOver = false;
+    let obstacles = [], spawnTimer = 0, groundPos = 0, startTime = Date.now();
+    
+    const GRAVITY = 0.7, JUMP_FORCE = 13, GROUND_Y = 60;
+
+    // Load Rekor Terbaik
+    let savedBest = localStorage.getItem("bestTimeVania");
+    if(savedBest) bestEl.innerText = `🏆 Best: ${savedBest}s`;
+
+    function jump() {
+        if (jumpCount < 2 && !gameOver) {
+            vy = JUMP_FORCE;
+            jumpCount++;
+        }
+    }
+
+    // Input (Keyboard & Sentuhan HP)
+    window.addEventListener("keydown", e => { if(e.code === "Space" || e.code === "ArrowUp") jump(); });
+    gameArea.addEventListener("touchstart", e => { e.preventDefault(); jump(); }, {passive: false});
+
+    function spawn() {
+        const rand = Math.random();
+        const el = document.createElement("div");
+        let type = 'enemy';
+
+        if (rand > 0.75) {
+            el.className = "love"; el.innerText = "❤️ VANIA";
+            el.style.bottom = (GROUND_Y + 60 + Math.random()*60) + "px";
+            type = 'love';
+        } else if (rand > 0.4) {
+            el.className = "cactus"; el.style.bottom = GROUND_Y + "px";
+            // Random Kaktus Berdekatan
+            if(Math.random() > 0.6) {
+                setTimeout(() => { if(!gameOver) spawnExtra(); }, 180);
+            }
+        } else {
+            el.className = "axe-air"; el.innerText = "🪓";
+            el.style.bottom = (GROUND_Y + 85) + "px";
+        }
+
+        el.style.left = "850px";
+        gameArea.appendChild(el);
+        obstacles.push({ el, type });
+    }
+
+    function spawnExtra() {
+        const el = document.createElement("div");
+        el.className = "cactus"; el.style.bottom = GROUND_Y + "px"; el.style.left = "850px";
+        gameArea.appendChild(el);
+        obstacles.push({ el, type: 'enemy' });
+    }
+
+    function update() {
+        if (gameOver) return;
+
+        let currentTime = ((Date.now() - startTime) / 1000).toFixed(1);
+        timerVal.innerText = currentTime;
+
+        vy -= GRAVITY; y += vy;
+        if (y <= 0) { y = 0; vy = 0; jumpCount = 0; }
+        player.style.bottom = (GROUND_Y + y) + "px";
+
+        groundPos -= speed; if (groundPos <= -50) groundPos = 0;
+        document.getElementById("ground").style.transform = `translateX(${groundPos}px)`;
+
+        if (--spawnTimer <= 0) {
+            spawn();
+            spawnTimer = Math.max(30, 75 - (loveCount * 0.8) + Math.random()*30);
+        }
+
+        const pRect = player.getBoundingClientRect();
+        for (let i = obstacles.length - 1; i >= 0; i--) {
+            let o = obstacles[i], x = o.el.offsetLeft - speed;
+            o.el.style.left = x + "px";
+
+            const oRect = o.el.getBoundingClientRect();
+            // Collision Detection
+            if (!(pRect.right-10 < oRect.left+10 || pRect.left+10 > oRect.right-10 || pRect.bottom-10 < oRect.top+10 || pRect.top+10 > oRect.bottom-10)) {
+                if (o.type === 'enemy') { finish(false, currentTime); return; }
+                else {
+                    loveCount++; scoreVal.innerText = loveCount;
+                    o.el.remove(); obstacles.splice(i,1); speed += 0.15;
+                    if (loveCount >= 50) { finish(true, currentTime); return; }
+                    continue;
+                }
+            }
+            if (x < -100) { o.el.remove(); obstacles.splice(i,1); }
+        }
+        requestAnimationFrame(update);
+    }
+
+    function finish(win, time) {
+        gameOver = true;
+        overlay.style.display = "flex";
+        let title = win ? "💍 HAPPY WEDDING!" : "💔 DIHADANG AMBON";
+        let sub = win ? `Yusuf & Vania bersatu dalam ${time}s!` : `Gagal mengumpulkan cinta Vania.`;
+        
+        if (win && (!savedBest || parseFloat(time) < parseFloat(savedBest))) {
+            localStorage.setItem("bestTimeVania", time);
+            sub += "<br><b style='color:#ffeb3b'>🏆 REKOR BARU!</b>";
+        }
+        overlay.innerHTML = `<h1>${title}</h1><p>${sub}</p><button onclick="location.reload()">MAIN LAGI</button>`;
+    }
+
+    requestAnimationFrame(update);
+</script>
+</body>
+</html>
